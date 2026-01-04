@@ -1,0 +1,133 @@
+// Simple calculator logic
+const displayEl = document.getElementById('display');
+const keys = document.querySelectorAll('.btn');
+
+let expression = ''; // internal expression string shown on display
+
+const operators = ['+', '−', '×', '÷', '%'];
+
+// Utility to update the shown display
+function updateDisplay() {
+  displayEl.textContent = expression || '0';
+}
+
+// Append number or decimal
+function appendValue(val) {
+  const last = expression.slice(-1);
+
+  // prevent multiple decimals in the current number
+  if (val === '.') {
+    // split by operator to get current number
+    const parts = expression.split(/[\+\−\×\÷\%]/);
+    const current = parts[parts.length - 1] || '';
+    if (current.includes('.')) return;
+    if (current === '') expression += '0'; // start with 0 when '.' pressed first
+  }
+
+  expression += val;
+  updateDisplay();
+}
+
+// Handle operator input
+function appendOperator(op) {
+  if (!expression && op !== '-') return; // only allow leading '-' for negative numbers
+
+  const last = expression.slice(-1);
+  if (operators.includes(last)) {
+    // replace last operator with the new one
+    expression = expression.slice(0, -1) + op;
+  } else {
+    expression += op;
+  }
+  updateDisplay();
+}
+
+// Delete last character
+function deleteLast() {
+  expression = expression.slice(0, -1);
+  updateDisplay();
+}
+
+// Clear all
+function clearAll() {
+  expression = '';
+  updateDisplay();
+}
+
+// Evaluate expression
+function calculate() {
+  if (!expression) return;
+  // convert friendly symbols to JS operators
+  let safeExpr = expression
+    .replace(/×/g, '*')
+    .replace(/÷/g, '/')
+    .replace(/−/g, '-')
+    .replace(/%/g, '/100');
+
+  // basic safety: only allow digits, operators, parentheses, dot and whitespace
+  if (!/^[0-9+\-*/().\s%]+$/.test(safeExpr)) {
+    displayEl.textContent = 'Error';
+    expression = '';
+    return;
+  }
+
+  try {
+    // eslint-disable-next-line no-new-func
+    let result = Function(`return (${safeExpr})`)();
+    if (!isFinite(result)) throw new Error('Math error');
+    // trim long floats
+    if (typeof result === 'number') {
+      result = Math.round((result + Number.EPSILON) * 1e12) / 1e12;
+    }
+    expression = String(result);
+    updateDisplay();
+  } catch (e) {
+    displayEl.textContent = 'Error';
+    expression = '';
+  }
+}
+
+// Click handling
+keys.forEach(key => {
+  key.addEventListener('click', () => {
+    const value = key.getAttribute('data-value');
+    const action = key.getAttribute('data-action');
+
+    if (action === 'clear') {
+      clearAll();
+      return;
+    }
+    if (action === 'delete') {
+      deleteLast();
+      return;
+    }
+    if (action === 'calculate') {
+      calculate();
+      return;
+    }
+
+    if (value) {
+      if (operators.includes(value)) appendOperator(value);
+      else appendValue(value);
+    }
+  });
+});
+
+// Keyboard support
+window.addEventListener('keydown', (e) => {
+  if (e.key >= '0' && e.key <= '9') {
+    appendValue(e.key);
+    return;
+  }
+  if (e.key === '.') { appendValue('.'); return; }
+  if (e.key === 'Backspace') { deleteLast(); return; }
+  if (e.key === 'Escape') { clearAll(); return; }
+  if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calculate(); return; }
+
+  // Map keyboard operators to displayed symbols
+  if (e.key === '+') { appendOperator('+'); return; }
+  if (e.key === '-') { appendOperator('−'); return; }
+  if (e.key === '*') { appendOperator('×'); return; }
+  if (e.key === '/') { appendOperator('÷'); return; }
+  if (e.key === '%') { appendOperator('%'); return; }
+});
