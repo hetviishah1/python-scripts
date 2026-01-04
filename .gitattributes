@@ -1,2 +1,8 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+<label for="fruits">Choose a fruit:</label>
+<input list="fruit-options" id="fruits" name="fruits" />
+<datalist id="fruit-options">
+  <option value="Apple"></option>
+  <option value="Orange"></option>
+  <option value="Banana"></option>
+</datalist>
+
