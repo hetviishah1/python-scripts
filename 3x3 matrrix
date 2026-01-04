@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3x3 Matrix</title>
+  <style>
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial; padding: 24px; }
+    .matrix { display: grid; grid-template-columns: repeat(3, 80px); gap: 8px; margin-bottom: 12px; }
+    .matrix input { width: 80px; padding: 8px; font-size: 16px; text-align: right; }
+    button { padding: 8px 12px; font-size: 14px; }
+    .result { margin-top: 12px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>3×3 Matrix</h1>
+  <div class="matrix" id="matrix">
+    <input type="number" step="any" value="0" id="m00">
+    <input type="number" step="any" value="0" id="m01">
+    <input type="number" step="any" value="0" id="m02">
+
+    <input type="number" step="any" value="0" id="m10">
+    <input type="number" step="any" value="0" id="m11">
+    <input type="number" step="any" value="0" id="m12">
+
+    <input type="number" step="any" value="0" id="m20">
+    <input type="number" step="any" value="0" id="m21">
+    <input type="number" step="any" value="0" id="m22">
+  </div>
+
+  <div>
+    <button id="detBtn">Compute Determinant</button>
+    <button id="clearBtn">Clear</button>
+  </div>
+
+  <div class="result" id="result">Determinant: —</div>
+
+  <script>
+    function getMatrix() {
+      const m = [];
+      for (let r = 0; r < 3; r++) {
+        const row = [];
+        for (let c = 0; c < 3; c++) {
+          const el = document.getElementById('m' + r + c);
+          row.push(parseFloat(el.value) || 0);
+        }
+        m.push(row);
+      }
+      return m;
+    }
+
+    function determinant3(m) {
+      // Compute determinant of 3x3 matrix
+      return (
+        m[0][0]*m[1][1]*m[2][2] +
+        m[0][1]*m[1][2]*m[2][0] +
+        m[0][2]*m[1][0]*m[2][1] -
+        m[0][2]*m[1][1]*m[2][0] -
+        m[0][0]*m[1][2]*m[2][1] -
+        m[0][1]*m[1][0]*m[2][2]
+      );
+    }
+
+    document.getElementById('detBtn').addEventListener('click', () => {
+      const m = getMatrix();
+      const det = determinant3(m);
+      document.getElementById('result').textContent = 'Determinant: ' + det;
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {m
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) document.getElementById('m'+r+c).value = 0;
+      document.getElementById('result').textContent = 'Determinant: —';
+    });
+  </script>
+</body>
+</html>
